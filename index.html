@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0a1929;
+            color: #ffffff;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Background pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px;
+            z-index: 0;
+        }
+
+        .triangle {
+            background-color: #1a5bff;
+            clip-path: polygon(100% 0, 0 100%, 100% 100%);
+            opacity: 0.1;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-form {
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 40px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-size: 28px;
+        }
+
+        .signup-text {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .signup-text a {
+            color: #1a5bff;
+            text-decoration: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a5bff;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .forgot-password {
+            color: #1a5bff;
+            text-decoration: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a5bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: #1548cc;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .sso-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .sso-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Main interface styles (initially hidden) */
+        .main-interface {
+            display: none;
+            min-height: 100vh;
+            background-color: #0a1929;
+            background-image: 
+                radial-gradient(at 40% 20%, rgba(26,91,255,0.1) 0px, transparent 50%),
+                radial-gradient(at 80% 0%, rgba(26,91,255,0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, rgba(26,91,255,0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            overflow-y: auto;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .logo span {
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links .create-account {
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-links .create-account:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26,91,255,0.2);
+        }
+
+        .main-content {
+            padding: 120px 40px 80px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .section-title h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title p {
+            color: #8b949e;
+            font-size: 1.1em;
+        }
+
+        .chatbot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .chatbot-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chatbot-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1a5bff, #42a5f5);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .chatbot-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .chatbot-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chatbot-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chatbot-card h3 {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .chatbot-card p {
+            color: #8b949e;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .chat-now-btn {
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26,91,255,0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 60px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1a5bff;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #8b949e;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .password-requirements {
+            color: #8b949e;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .signup-container {
+            display: none; /* Initially hidden */
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8b949e;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        /* Add smooth scrolling to the whole page */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Add styles for the landing page */
+        .landing-page {
+            min-height: 100vh;
+            background-color: #0a1929;
+            color: #ffffff;
+        }
+
+        .landing-nav {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .landing-nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .landing-nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .landing-nav-links .auth-btn {
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .landing-nav-links .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26,91,255,0.2);
+        }
+
+        .hero-section {
+            padding: 180px 40px 100px;
+            text-align: center;
+            background-image: 
+                radial-gradient(at 40% 20%, rgba(26,91,255,0.1) 0px, transparent 50%),
+                radial-gradient(at 80% 0%, rgba(26,91,255,0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, rgba(26,91,255,0.1) 0px, transparent 50%);
+        }
+
+        .hero-title {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2em;
+            color: #8b949e;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .features-section {
+            padding: 100px 40px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #1a5bff;
+        }
+
+        .feature-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .feature-description {
+            color: #8b949e;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            padding: 100px 40px;
+            text-align: center;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #1a5bff, #42a5f5);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26,91,255,0.2);
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 40px;
+            text-align: center;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="background-pattern">
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+        <div class="triangle"></div>
+    </div>
+
+    <!-- Landing Page -->
+    <div class="landing-page">
+        <nav class="landing-nav">
+            <a href="#" class="logo">
+                <span>🤖 AI Chatbot Platform</span>
+            </a>
+            <div class="landing-nav-links">
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+            </div>
+        </nav>
+    
+        <section class="hero-section">
+            <h1 class="hero-title">Master Programming with AI</h1>
+            <p class="hero-subtitle">
+                Experience personalized learning with our AI-powered chatbots. 
+                Get instant help, practice coding, and master programming concepts at your own pace.
+            </p>
+            <a href="#" onclick="showSignup()" class="cta-button">Create Free Account</a>
+        </section>
+    
+        <section class="features-section" id="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Personalized Learning</h3>
+                    <p class="feature-description">
+                        Adaptive learning paths tailored to your skill level and learning style.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Instant Help</h3>
+                    <p class="feature-description">
+                        Get immediate answers to your programming questions 24/7.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3 class="feature-title">Comprehensive Topics</h3>
+                    <p class="feature-description">
+                        From basic to advanced concepts across multiple programming domains.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">AI-Powered</h3>
+                    <p class="feature-description">
+                        Advanced AI technology ensures accurate and helpful responses.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Practice Exercises</h3>
+                    <p class="feature-description">
+                        Interactive coding challenges to reinforce your learning.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Progress Tracking</h3>
+                    <p class="feature-description">
+                        Monitor your learning journey with detailed progress analytics.
+                    </p>
+                </div>
+            </div>
+        </section>
+    
+        <section class="cta-section">
+            <a href="#" onclick="showSignup()" class="cta-button">Create Free Account</a>
+        </section>
+    
+        <footer class="footer">
+            <p>© 2024 AI Chatbot Platform. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="login-form">
+            <h2>Welcome back!</h2>
+            <p class="signup-text">Don't have an account yet? <a href="#" onclick="showSignup()">Sign up now</a></p>
+            
+            <div class="form-group">
+                <input type="email" id="login-email" placeholder="Email address" required>
+                <div class="error-message" id="login-email-error">Please enter a valid email address</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="login-password" placeholder="Password" required>
+                <span class="password-toggle" onclick="togglePassword('login-password')">👁️</span>
+                <div class="error-message" id="login-password-error">Password is required</div>
+            </div>
+            
+            <div class="remember-forgot">
+                <label class="remember-me">
+                    <input type="checkbox" id="remember-me">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+            
+            <button class="login-btn" onclick="validateLogin()">Log in</button>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <button class="sso-btn">Log in with SSO</button>
+        </div>
+    </div>
+
+    <!-- Signup Container -->
+    <div class="signup-container">
+        <div class="login-form">
+            <h2>Create Account</h2>
+            <p class="signup-text">Already have an account? <a href="#" onclick="showLogin()">Log in</a></p>
+            
+            <div class="form-group">
+                <input type="text" id="signup-name" placeholder="Full Name" required>
+                <div class="error-message" id="signup-name-error">Please enter your name</div>
+            </div>
+
+            <div class="form-group">
+                <input type="email" id="signup-email" placeholder="Email address" required>
+                <div class="error-message" id="signup-email-error">Please enter a valid email address</div>
+            </div>
+
+            <div class="form-group">
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <span class="password-toggle" onclick="togglePassword('signup-password')">👁️</span>
+                <div class="error-message" id="signup-password-error">Password is required</div>
+            </div>
+
+            <div class="form-group">
+                <input type="tel" id="signup-phone" placeholder="Phone Number" required>
+                <div class="error-message" id="signup-phone-error">Please enter a valid phone number</div>
+            </div>
+            
+            <button class="login-btn" onclick="validateSignup()">Create Account</button>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="main-interface">
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <span>🤖 AI Chatbot Platform</span>
+            </a>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">Features</a>
+                <a href="#">About</a>
+                <a href="#" onclick="logout()" class="create-account">Logout</a>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="section-title">
+                <h1>Choose Your AI Assistant</h1>
+                <p>Select from our specialized chatbots to enhance your learning experience</p>
+            </div>
+
+            <div class="chatbot-grid">
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">☕</div>
+                    <h3>Java Master</h3>
+                    <p>Master Java programming with our intelligent tutor. Perfect for beginners and advanced developers.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">🔄</div>
+                    <h3>OOPs Master</h3>
+                    <p>Learn object-oriented programming concepts with practical examples and exercises.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">🧠</div>
+                    <h3>ML Master</h3>
+                    <p>Explore machine learning algorithms and implementations with guided tutorials.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">🤖</div>
+                    <h3>AI Master</h3>
+                    <p>Dive into artificial intelligence concepts with interactive learning sessions.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">📱</div>
+                    <h3>HTML Master</h3>
+                    <p>Build modern websites with expert guidance on HTML and web development.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+
+                <div class="chatbot-card">
+                    <div class="chatbot-icon">🎨</div>
+                    <h3>CSS Master</h3>
+                    <p>Create beautiful web designs with advanced CSS techniques and best practices.</p>
+                    <button class="chat-now-btn">Chat Now</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Questions Answered</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add event listeners for keyboard support
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form keyboard support
+            const loginForm = document.querySelector('.login-form');
+            const loginEmail = document.getElementById('login-email');
+            const loginPassword = document.getElementById('login-password');
+            
+            loginEmail.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loginPassword.focus();
+                }
+            });
+
+            loginPassword.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    validateLogin();
+                }
+            });
+
+            // Signup form keyboard support
+            const signupForm = document.querySelector('.signup-container .login-form');
+            const signupInputs = signupForm.querySelectorAll('input');
+            
+            signupInputs.forEach((input, index) => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        if (index < signupInputs.length - 1) {
+                            // Move to next input
+                            signupInputs[index + 1].focus();
+                        } else {
+                            // Last input - submit form
+                            validateSignup();
+                        }
+                    }
+                });
+            });
+        });
+
+        function showLogin() {
+            document.querySelector('.landing-page').style.display = 'none';
+            document.querySelector('.login-container').style.display = 'flex';
+            document.querySelector('.signup-container').style.display = 'none';
+            document.querySelector('.main-interface').style.display = 'none';
+            document.getElementById('login-email').focus();
+        }
+
+        function showSignup() {
+            document.querySelector('.landing-page').style.display = 'none';
+            document.querySelector('.login-container').style.display = 'none';
+            document.querySelector('.signup-container').style.display = 'flex';
+            document.querySelector('.main-interface').style.display = 'none';
+            document.getElementById('signup-name').focus();
+        }
+
+        function showLanding() {
+            document.querySelector('.landing-page').style.display = 'block';
+            document.querySelector('.login-container').style.display = 'none';
+            document.querySelector('.signup-container').style.display = 'none';
+            document.querySelector('.main-interface').style.display = 'none';
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function validateLogin() {
+            const email = document.getElementById('login-email');
+            const password = document.getElementById('login-password');
+            let isValid = true;
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(err => err.style.display = 'none');
+
+            // Validate email
+            if (!email.checkValidity()) {
+                document.getElementById('login-email-error').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate password
+            if (!password.value) {
+                document.getElementById('login-password-error').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Proceed with login
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.main-interface').style.display = 'block';
+                // Reset scroll position
+                window.scrollTo(0, 0);
+                // Enable body scrolling
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function validateSignup() {
+            const name = document.getElementById('signup-name');
+            const email = document.getElementById('signup-email');
+            const password = document.getElementById('signup-password');
+            const phone = document.getElementById('signup-phone');
+            let isValid = true;
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(err => err.style.display = 'none');
+
+            // Validate name
+            if (!name.checkValidity()) {
+                document.getElementById('signup-name-error').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate email
+            if (!email.checkValidity()) {
+                document.getElementById('signup-email-error').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate password
+            if (!password.checkValidity()) {
+                document.getElementById('signup-password-error').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate phone
+            if (!phone.checkValidity()) {
+                document.getElementById('signup-phone-error').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Proceed with signup
+                alert('Account created successfully! Please log in.');
+                showLogin();
+            }
+        }
+
+        // Add this function to handle logout (if needed)
+        function logout() {
+            showLanding();
+            // Reset forms
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+        }
+    </script>
+</body>
+</html>
